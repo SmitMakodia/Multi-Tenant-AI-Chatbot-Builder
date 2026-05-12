@@ -87,33 +87,33 @@
 ```mermaid
 graph TB
     subgraph Browsers["Browsers"]
-        Admin["Admin Dashboard<br/>(React SPA :8011)"]
-        Visitor["Visitor Browser<br/>(Embedded Widget)"]
+        Admin["Admin Dashboard\n(React SPA :8011)"]
+        Visitor["Visitor Browser\n(Embedded Widget)"]
         TelegramApp["Telegram App"]
     end
 
     subgraph GoAPI["Go HTTP API Server (:8010)"]
-        Router["net/http Mux<br/>+ Middleware"]
-        Handlers["Handlers Layer<br/>agents / sources / chat<br/>analytics / deploy / telegram"]
-        Services["Services Layer<br/>llm / rag / knowledge<br/>sentiment / topics / crawler<br/>telegram"]
-        DB["GORM + SQLite<br/>local/db/chatbot.db"]
-        Files["File Storage<br/>local/uploads/{chatbot_id}/"]
+        Router["net/http Mux\n+ Middleware"]
+        Handlers["Handlers Layer\nagents / sources / chat\nanalytics / deploy / telegram"]
+        Services["Services Layer\nllm / rag / knowledge\nsentiment / topics / crawler\ntelegram"]
+        DB["GORM + SQLite\nlocal/db/chatbot.db"]
+        Files["File Storage\nlocal/uploads/{chatbot_id}/"]
     end
 
     subgraph RAGStack["RAG Stack"]
-        Python["Python RAG Service<br/>FastAPI :8001<br/>all-MiniLM-L6-v2<br/>ms-marco reranker"]
-        Qdrant["Qdrant Vector DB<br/>Docker :6333<br/>INT8 quantization<br/>HNSW index"]
+        Python["Python RAG Service\nFastAPI :8001\nall-MiniLM-L6-v2\nms-marco reranker"]
+        Qdrant["Qdrant Vector DB\nDocker :6333\nINT8 quantization\nHNSW index"]
     end
 
     subgraph LLMProviders["LLM Providers (External)"]
-        OpenAI["OpenAI API<br/>gpt-4o / gpt-4o-mini<br/>gpt-5-nano etc."]
-        Anthropic["Anthropic API<br/>claude-sonnet-4-5<br/>claude-haiku-4-5"]
-        Gemini["Google Gemini API<br/>gemini-2.5-flash<br/>gemini-3-flash"]
-        OpenRouter["OpenRouter API<br/>nvidia/nemotron<br/>+ 1000s of models"]
+        OpenAI["OpenAI API\ngpt-4o / gpt-4o-mini\ngpt-5-nano etc."]
+        Anthropic["Anthropic API\nclaude-sonnet-4-5\nclaude-haiku-4-5"]
+        Gemini["Google Gemini API\ngemini-2.5-flash\ngemini-3-flash"]
+        OpenRouter["OpenRouter API\nnvidia/nemotron\n+ 1000s of models"]
     end
 
     Admin -- "HTTP/Axios /api/*" --> Router
-    Visitor -- "fetch() /api/public/*<br/>/api/widget/*" --> Router
+    Visitor -- "fetch() /api/public/*\n/api/widget/*" --> Router
     TelegramApp -- "POST /api/telegram/webhook/{id}" --> Router
 
     Router --> Handlers
@@ -153,7 +153,7 @@ sequenceDiagram
 
     OS->>Main: go run ./cmd/api
     Main->>Logger: InitLogger()
-    Logger-->>Main: lumberjack log to app.log<br/>(100MB, 5 backups, 30 days, gzip)
+    Logger-->>Main: lumberjack log to app.log\n(100MB, 5 backups, 30 days, gzip)
     Main->>Config: EnvLoader()
     Config->>Config: godotenv.Load(".env.development")
     Config->>Config: os.Getenv() all 12 vars
@@ -161,7 +161,7 @@ sequenceDiagram
     Main->>DB: InitDB()
     DB->>DB: gorm.Open(sqlite, "local/db/chatbot.db")
     DB->>DB: AutoMigrate 24 models
-    Note over DB: Workspace, WorkspaceMember, User,<br/>Chatbot, ChatbotAISettings, ...<br/>TelegramConfig, BinaryAsset
+    Note over DB: Workspace, WorkspaceMember, User,\nChatbot, ChatbotAISettings, ...\nTelegramConfig, BinaryAsset
     DB-->>Main: DB global ready
     Main->>Routes: SetupAPI(mux)
     Routes->>Routes: SetupAgentAPI (JWT wrapped)
@@ -185,80 +185,80 @@ sequenceDiagram
 graph LR
     subgraph Backend["backend/ (Go module: chatbot)"]
         subgraph cmd["cmd/api/"]
-            main["main.go<br/>Entrypoint"]
+            main["main.go\nEntrypoint"]
         end
         subgraph internal["internal/"]
             subgraph config["config/"]
-                cfg["config.go<br/>Config struct<br/>EnvLoader()"]
-                consts["const.go<br/>API URLs<br/>Model names<br/>SupportedModels[]"]
+                cfg["config.go\nConfig struct\nEnvLoader()"]
+                consts["const.go\nAPI URLs\nModel names\nSupportedModels[]"]
             end
             subgraph db["db/"]
-                dbgo["db.go<br/>InitDB()<br/>global DB *gorm.DB"]
+                dbgo["db.go\nInitDB()\nglobal DB *gorm.DB"]
             end
             subgraph models["models/"]
-                mgo["models.go<br/>24 GORM structs<br/>UUID BeforeCreate hooks"]
+                mgo["models.go\n24 GORM structs\nUUID BeforeCreate hooks"]
             end
             subgraph routes["routes/"]
-                rgo["routes.go<br/>SetupAPI()<br/>SetupAgentAPI()<br/>SetupSourcesAPI()<br/>SetupPlaygroundAPI()<br/>SetupAnalyticsAPI()<br/>SetupDeployAPI()"]
+                rgo["routes.go\nSetupAPI()\nSetupAgentAPI()\nSetupSourcesAPI()\nSetupPlaygroundAPI()\nSetupAnalyticsAPI()\nSetupDeployAPI()"]
             end
             subgraph middleware["middleware/"]
-                mw["middleware.go<br/>AuthMiddleware<br/>LoggerMiddleware<br/>RecoverMiddleware<br/>ApplyMiddlewares()"]
+                mw["middleware.go\nAuthMiddleware\nLoggerMiddleware\nRecoverMiddleware\nApplyMiddlewares()"]
             end
             subgraph handlers["handlers/"]
-                agents_h["agents.go<br/>CRUD chatbots<br/>widget config"]
-                sources_h["sources.go<br/>text/qa/file/url<br/>source CRUD"]
-                playground_h["playground.go<br/>handleChat()<br/>ChatHandler<br/>PublicChatHandler"]
-                retrain_h["retrain.go<br/>RetrainHandler<br/>RAGHealthHandler"]
-                settings_h["settings.go<br/>AI settings<br/>lead form config"]
-                analytics_h["analytics.go<br/>stats/topics<br/>sentiments/leads"]
-                messages_h["messages.go<br/>feedback<br/>session detail<br/>chat history"]
-                contacts_h["contacts.go<br/>CRUD contacts<br/>public lead submit"]
-                deploy_h["deploy.go<br/>bundle.js<br/>iframe HTML<br/>embed script"]
-                crawl_h["crawl.go<br/>start/status/SSE<br/>crawl job mgmt"]
-                telegram_h["telegram.go<br/>config CRUD<br/>webhook receiver"]
+                agents_h["agents.go\nCRUD chatbots\nwidget config"]
+                sources_h["sources.go\ntext/qa/file/url\nsource CRUD"]
+                playground_h["playground.go\nhandleChat()\nChatHandler\nPublicChatHandler"]
+                retrain_h["retrain.go\nRetrainHandler\nRAGHealthHandler"]
+                settings_h["settings.go\nAI settings\nlead form config"]
+                analytics_h["analytics.go\nstats/topics\nsentiments/leads"]
+                messages_h["messages.go\nfeedback\nsession detail\nchat history"]
+                contacts_h["contacts.go\nCRUD contacts\npublic lead submit"]
+                deploy_h["deploy.go\nbundle.js\niframe HTML\nembed script"]
+                crawl_h["crawl.go\nstart/status/SSE\ncrawl job mgmt"]
+                telegram_h["telegram.go\nconfig CRUD\nwebhook receiver"]
             end
             subgraph services["services/"]
-                llm_s["llm.go<br/>GenerateCompletion()<br/>4 provider adapters<br/>cleanResponse()"]
-                rag_s["rag.go<br/>IsRAGAvailable()<br/>ChunkText()<br/>IndexKnowledgeBase()<br/>RetrieveContext()"]
-                knowledge_s["knowledge.go<br/>BuildKnowledgeMarkdown()<br/>GetContextForChat()<br/>LoadContactsContext()"]
-                sentiment_s["sentiment.go<br/>AnalyzeSentiment()<br/>rule-based 5-class"]
-                topics_s["topics.go<br/>ClassifyTopic()<br/>domain + frequency"]
-                crawler_s["crawler.go<br/>CrawlWebsite()<br/>StartCrawlJob()<br/>SSE progress"]
-                telegram_s["telegram.go<br/>EncryptToken()<br/>SendNotification()<br/>Bot API client"]
+                llm_s["llm.go\nGenerateCompletion()\n4 provider adapters\ncleanResponse()"]
+                rag_s["rag.go\nIsRAGAvailable()\nChunkText()\nIndexKnowledgeBase()\nRetrieveContext()"]
+                knowledge_s["knowledge.go\nBuildKnowledgeMarkdown()\nGetContextForChat()\nLoadContactsContext()"]
+                sentiment_s["sentiment.go\nAnalyzeSentiment()\nrule-based 5-class"]
+                topics_s["topics.go\nClassifyTopic()\ndomain + frequency"]
+                crawler_s["crawler.go\nCrawlWebsite()\nStartCrawlJob()\nSSE progress"]
+                telegram_s["telegram.go\nEncryptToken()\nSendNotification()\nBot API client"]
             end
         end
         subgraph logger["logger/"]
-            loggo["logger.go<br/>InitLogger()<br/>lumberjack"]
+            loggo["logger.go\nInitLogger()\nlumberjack"]
         end
         subgraph rag["rag/"]
-            ragpy["RAG_service.py<br/>FastAPI :8001<br/>/embed_query<br/>/embed_docs<br/>/rerank"]
-            reqs["requirements.txt<br/>fastembed<br/>fastapi<br/>uvicorn<br/>pydantic"]
+            ragpy["RAG_service.py\nFastAPI :8001\n/embed_query\n/embed_docs\n/rerank"]
+            reqs["requirements.txt\nfastembed\nfastapi\nuvicorn\npydantic"]
         end
         subgraph local["local/"]
-            dbfile["db/chatbot.db<br/>SQLite database"]
-            uploads["uploads/{chatbot_id}/<br/>knowledge.md<br/>snippets.md<br/>qa.md<br/>crawlData.md<br/>files/"]
+            dbfile["db/chatbot.db\nSQLite database"]
+            uploads["uploads/{chatbot_id}/\nknowledge.md\nsnippets.md\nqa.md\ncrawlData.md\nfiles/"]
         end
     end
 
     subgraph Frontend["frontend/ (React + Vite)"]
-        mainjs["main.jsx<br/>ReactDOM root"]
-        appjs["App.jsx<br/>Auth bootstrap<br/>Layout<br/>3-panel grid"]
+        mainjs["main.jsx\nReactDOM root"]
+        appjs["App.jsx\nAuth bootstrap\nLayout\n3-panel grid"]
         subgraph api_dir["api/"]
-            clientjs["client.js<br/>Axios instance<br/>All API functions"]
+            clientjs["client.js\nAxios instance\nAll API functions"]
         end
         subgraph components_dir["components/"]
-            sidebar["Sidebar.jsx<br/>NavLink navigation"]
-            widget_cmp["Widget.jsx<br/>Live chat preview<br/>ReactMarkdown<br/>Lead form"]
+            sidebar["Sidebar.jsx\nNavLink navigation"]
+            widget_cmp["Widget.jsx\nLive chat preview\nReactMarkdown\nLead form"]
         end
         subgraph pages_dir["pages/"]
-            pg["Playground.jsx<br/>LLM config<br/>Retrain"]
-            st["Settings.jsx<br/>Widget appearance<br/>Create/Delete"]
-            act["Activity.jsx<br/>Chat logs<br/>Leads"]
-            an["Analytics.jsx<br/>Recharts<br/>Chats/Topics/Sentiments"]
-            ds["DataSources.jsx<br/>Files/Text/Website/QA"]
-            dep["Deploy.jsx<br/>Embed codes"]
-            con["Contacts.jsx<br/>Contact CRUD"]
-            conn["Connect.jsx<br/>Telegram setup"]
+            pg["Playground.jsx\nLLM config\nRetrain"]
+            st["Settings.jsx\nWidget appearance\nCreate/Delete"]
+            act["Activity.jsx\nChat logs\nLeads"]
+            an["Analytics.jsx\nRecharts\nChats/Topics/Sentiments"]
+            ds["DataSources.jsx\nFiles/Text/Website/QA"]
+            dep["Deploy.jsx\nEmbed codes"]
+            con["Contacts.jsx\nContact CRUD"]
+            conn["Connect.jsx\nTelegram setup"]
         end
     end
 ```
@@ -513,14 +513,14 @@ flowchart LR
     Req["HTTP Request"] --> MuxMatch["Mux Pattern Match"]
 
     MuxMatch -- "admin API routes" --> Logger
-    Logger["LoggerMiddleware<br/>log method+path+duration"] --> Recover
-    Recover["RecoverMiddleware<br/>defer recover()<br/>→ 500 on panic"] --> Auth
-    Auth["AuthMiddleware<br/>parse Bearer JWT<br/>inject claims to ctx<br/>→ 401 if invalid"] --> Handler
+    Logger["LoggerMiddleware\nlog method+path+duration"] --> Recover
+    Recover["RecoverMiddleware\ndefer recover()\n→ 500 on panic"] --> Auth
+    Auth["AuthMiddleware\nparse Bearer JWT\ninject claims to ctx\n→ 401 if invalid"] --> Handler
     Handler["Handler Function"] --> Resp["HTTP Response"]
 
     MuxMatch -- "public/deploy routes" --> PubHandler["Handler (no middleware)"] --> Resp
 
-    MuxMatch -- "/api/health, /api/rag/health<br/>/api/dev/token" --> DirectHandler["Direct mux handler"] --> Resp
+    MuxMatch -- "/api/health, /api/rag/health\n/api/dev/token" --> DirectHandler["Direct mux handler"] --> Resp
 
     style Auth fill:#fee2e2,stroke:#ef4444
     style Logger fill:#f0f9ff,stroke:#0369a1
@@ -543,20 +543,20 @@ sequenceDiagram
     participant LLM as LLM Provider
     participant Async as Goroutine
 
-    W->>API: POST /api/chat/{id}<br/>{message, session_id?}
+    W->>API: POST /api/chat/{id}\n{message, session_id?}
     API->>API: AuthMiddleware validates JWT
     API->>DB: SELECT chatbot WHERE id=?
     API->>DB: SELECT ai_settings WHERE chatbot_id=?
 
     alt No session_id
-        API->>DB: INSERT conversation<br/>(source="admin_playground")
+        API->>DB: INSERT conversation\n(source="admin_playground")
         API->>DB: UPDATE daily_stats TotalChats++
     end
 
     API->>DB: INSERT message (role=user)
-    API->>DB: SELECT messages WHERE conversation_id=?<br/>ORDER BY created_at ASC (history)
+    API->>DB: SELECT messages WHERE conversation_id=?\nORDER BY created_at ASC (history)
 
-    API->>API: Build system prompt:<br/>instructions + MD formatting rules
+    API->>API: Build system prompt:\ninstructions + MD formatting rules
     API->>KnowSvc: LoadContactsContext(chatbotID)
     KnowSvc->>DB: SELECT contacts WHERE source IN (manual, csv_import)
     KnowSvc-->>API: contact directory block
@@ -567,9 +567,9 @@ sequenceDiagram
 
     alt RAG Available
         RAGSvc->>PySvc: POST /embed_query {text: message}
-        Note over PySvc: LRU cache check (512 entries)<br/>ONNX inference if miss
+        Note over PySvc: LRU cache check (512 entries)\nONNX inference if miss
         PySvc-->>RAGSvc: {embedding: [384 floats], cached}
-        RAGSvc->>Qdrant: POST /collections/{name}/points/search<br/>{vector, limit:10, quantization.rescore:true}
+        RAGSvc->>Qdrant: POST /collections/{name}/points/search\n{vector, limit:10, quantization.rescore:true}
         Qdrant-->>RAGSvc: [{score, payload.text}] top 10
         RAGSvc->>Qdrant: GET /collections/{name} → points_count
         alt points_count >= 1000
@@ -582,16 +582,16 @@ sequenceDiagram
         RAGSvc-->>API: context chunks joined by "---"
     else RAG Unavailable
         API->>KnowSvc: GetContextForChat(chatbotID, message)
-        KnowSvc->>KnowSvc: read snippets.md + qa.md<br/>+ crawlData.md + files/*<br/>16k char limit
+        KnowSvc->>KnowSvc: read snippets.md + qa.md\n+ crawlData.md + files/*\n16k char limit
         KnowSvc-->>API: fallback full-text context
     end
 
-    API->>API: Build LLMMessages:<br/>[system+context, ...history, user_msg]
-    API->>LLM: POST to provider<br/>(OpenAI/Claude/Gemini/OpenRouter)
+    API->>API: Build LLMMessages:\n[system+context, ...history, user_msg]
+    API->>LLM: POST to provider\n(OpenAI/Claude/Gemini/OpenRouter)
     LLM-->>API: {content, tokens}
-    API->>API: cleanResponse()<br/>(strip artifacts, fix spacing)
+    API->>API: cleanResponse()\n(strip artifacts, fix spacing)
 
-    API->>DB: INSERT message (role=assistant,<br/>model, temp, tokens)
+    API->>DB: INSERT message (role=assistant,\nmodel, temp, tokens)
     API->>DB: UPDATE daily_stats TotalMessages+=2
 
     API-->>W: {session_id, message_id, response, tokens}
@@ -628,7 +628,7 @@ sequenceDiagram
 
     Visitor->>API: GET /api/widget/{id}/iframe
     API->>DB: SELECT chatbot + widget_config + lead_form
-    API-->>iframe: Full HTML page<br/>(CSS vars, JS, marked.js CDN)
+    API-->>iframe: Full HTML page\n(CSS vars, JS, marked.js CDN)
 
     iframe->>iframe: render initial greeting message
     iframe->>iframe: genId() → localStorage visitor_id
@@ -639,15 +639,15 @@ sequenceDiagram
     iframe->>iframe: showTyping() — 3 dots
     iframe->>iframe: userMsgCount++
 
-    iframe->>API: POST /api/public/chat/{id}<br/>{message, session_id?, visitor_id}
+    iframe->>API: POST /api/public/chat/{id}\n{message, session_id?, visitor_id}
     API->>API: CORS headers (Allow-Origin: *)
     API->>DB: SELECT chatbot + ai_settings
 
     alt No session_id (new visitor)
-        API->>DB: UPSERT contact<br/>(by external_id=visitor_id)
-        API->>DB: INSERT conversation<br/>(source="embed_widget", contact_id)
+        API->>DB: UPSERT contact\n(by external_id=visitor_id)
+        API->>DB: INSERT conversation\n(source="embed_widget", contact_id)
         API->>API: go SendNotification("new_session")
-        API->>Telegram: sendMessage to NotificationChatID<br/>"💬 New Chat Started..."
+        API->>Telegram: sendMessage to NotificationChatID\n"💬 New Chat Started..."
     end
 
     Note over API: [same LLM + RAG flow as admin chat]
@@ -663,7 +663,7 @@ sequenceDiagram
         iframe->>iframe: setTimeout(showLeadCard, 600ms)
         iframe->>iframe: render lead-card with configured fields
         Visitor->>iframe: fills form, clicks "Send Details"
-        iframe->>API: POST /api/public/leads/{id}<br/>{name, email, phone, session_id, visitor_id}
+        iframe->>API: POST /api/public/leads/{id}\n{name, email, phone, session_id, visitor_id}
         API->>DB: UPSERT contact
         API->>DB: INSERT lead
         API->>API: go SendNotification("new_lead")
@@ -675,7 +675,7 @@ sequenceDiagram
 
     opt Visitor gives feedback
         Visitor->>iframe: clicks 👍 or 👎
-        iframe->>API: POST /api/public/messages/{id}/feedback<br/>{feedback: "good"|"bad"}
+        iframe->>API: POST /api/public/messages/{id}/feedback\n{feedback: "good"|"bad"}
         API->>DB: UPDATE message SET feedback
         API->>DB: UPSERT daily_stats thumb_up/down++
         API-->>iframe: {success}
@@ -689,38 +689,38 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A["User clicks 'Retrain AI Model'<br/>POST /api/sources/{id}/retrain"] --> B
+    A["User clicks 'Retrain AI Model'\nPOST /api/sources/{id}/retrain"] --> B
 
     B["RetrainHandler"]
-    B --> C["BuildKnowledgeMarkdown(chatbotID)<br/>writes knowledge.md, snippets.md,<br/>qa.md, files/"]
+    B --> C["BuildKnowledgeMarkdown(chatbotID)\nwrites knowledge.md, snippets.md,\nqa.md, files/"]
 
-    C --> D["IsRAGAvailable()?<br/>ping :8001/health AND :6333/healthz"]
+    C --> D["IsRAGAvailable()?\nping :8001/health AND :6333/healthz"]
 
-    D -- "NO (either down)" --> E["Return response with<br/>rag_available: false<br/>Next chat uses full-context fallback"]
+    D -- "NO (either down)" --> E["Return response with\nrag_available: false\nNext chat uses full-context fallback"]
 
-    D -- "YES" --> F["buildRAGContent(chatbotID)<br/>reads: snippets.md<br/>qa.md<br/>crawlData.md<br/>files/*<br/>skips: knowledge.md"]
+    D -- "YES" --> F["buildRAGContent(chatbotID)\nreads: snippets.md\nqa.md\ncrawlData.md\nfiles/*\nskips: knowledge.md"]
 
     F --> G["IndexKnowledgeBase(chatbotID, content)"]
 
-    G --> H["ChunkKnowledgeMarkdown(content, chatbotID)<br/>1. splitByHeadings() → sections at '## '<br/>2. ChunkText(section, source) for each:<br/>   chunkSize=800, overlap=100<br/>   seeks sentence boundary backward"]
+    G --> H["ChunkKnowledgeMarkdown(content, chatbotID)\n1. splitByHeadings() → sections at '## '\n2. ChunkText(section, source) for each:\n   chunkSize=800, overlap=100\n   seeks sentence boundary backward"]
 
-    H --> I["DeleteCollection(chatbotID)<br/>DELETE :6333/collections/{name}"]
+    H --> I["DeleteCollection(chatbotID)\nDELETE :6333/collections/{name}"]
 
-    I --> J["EnsureCollection(chatbotID)<br/>PUT :6333/collections/{name}<br/>vectors: {size:384, distance:Cosine}<br/>quantization: INT8 scalar, quantile=0.99<br/>hnsw: {m:12, ef_construct:80}<br/>on_disk_payload: true"]
+    I --> J["EnsureCollection(chatbotID)\nPUT :6333/collections/{name}\nvectors: {size:384, distance:Cosine}\nquantization: INT8 scalar, quantile=0.99\nhnsw: {m:12, ef_construct:80}\non_disk_payload: true"]
 
-    J --> K["Extract texts from chunks[]<br/>texts = [chunk.Text for each chunk]"]
+    J --> K["Extract texts from chunks[]\ntexts = [chunk.Text for each chunk]"]
 
-    K --> L["EmbedDocs(texts)<br/>POST :8001/embed_docs<br/>{texts: [...]}"]
+    K --> L["EmbedDocs(texts)\nPOST :8001/embed_docs\n{texts: [...]}"]
 
-    L --> M["Python RAG Service<br/>fastembed TextEmbedding.embed(texts)<br/>returns [][]float32, 384 dims each<br/>NO cache (batch indexing)"]
+    L --> M["Python RAG Service\nfastembed TextEmbedding.embed(texts)\nreturns [][]float32, 384 dims each\nNO cache (batch indexing)"]
 
     M --> N["Validate: len(embeddings) == len(chunks)"]
 
-    N --> O["UpsertChunks(chatbotID, chunks, embeddings)<br/>PUT :6333/collections/{name}/points<br/>points: [{id:i+1, vector:[384f], payload:<br/>  {text, source, chunk_idx, chatbot_id}}]"]
+    N --> O["UpsertChunks(chatbotID, chunks, embeddings)\nPUT :6333/collections/{name}/points\npoints: [{id:i+1, vector:[384f], payload:\n  {text, source, chunk_idx, chatbot_id}}]"]
 
-    O --> P["GetChunkCount(chatbotID)<br/>GET :6333/collections/{name}<br/>→ result.points_count"]
+    O --> P["GetChunkCount(chatbotID)\nGET :6333/collections/{name}\n→ result.points_count"]
 
-    P --> Q["Return response:<br/>{rag_indexed:true, rag_chunks:N,<br/>approx_tokens:chars/4, last_trained_at}"]
+    P --> Q["Return response:\n{rag_indexed:true, rag_chunks:N,\napprox_tokens:chars/4, last_trained_at}"]
 
     style G fill:#f0fdf4,stroke:#059669
     style L fill:#fef9c3,stroke:#ca8a04
@@ -733,40 +733,40 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["User message arrives<br/>handleChat()"] --> B
+    A["User message arrives\nhandleChat()"] --> B
 
-    B["IsRAGAvailable()<br/>1s timeout each:<br/>GET :8001/health<br/>GET :6333/healthz"]
+    B["IsRAGAvailable()\n1s timeout each:\nGET :8001/health\nGET :6333/healthz"]
 
     B -- "Both 200" --> C["RetrieveContext(chatbotID, query)"]
-    B -- "Either fails" --> Z["GetContextForChat(chatbotID, msg)<br/>read files up to 16k chars<br/>snippets.md + qa.md +<br/>crawlData.md + files/*"]
+    B -- "Either fails" --> Z["GetContextForChat(chatbotID, msg)\nread files up to 16k chars\nsnippets.md + qa.md +\ncrawlData.md + files/*"]
 
-    C --> D["EmbedQuery(query)<br/>POST :8001/embed_query<br/>{text: query}"]
+    C --> D["EmbedQuery(query)\nPOST :8001/embed_query\n{text: query}"]
 
-    D --> E{"LRU Cache hit?<br/>maxsize=512<br/>key=text"}
+    D --> E{"LRU Cache hit?\nmaxsize=512\nkey=text"}
     E -- "HIT (40-60%)" --> F["Return cached tuple → list"]
-    E -- "MISS" --> G["ONNX inference<br/>all-MiniLM-L6-v2<br/>3-8ms<br/>returns 384-dim vector"]
+    E -- "MISS" --> G["ONNX inference\nall-MiniLM-L6-v2\n3-8ms\nreturns 384-dim vector"]
     G --> F
 
-    F --> H["SearchChunks(chatbotID, queryVec, topK=10)<br/>POST :6333/collections/{name}/points/search<br/>{vector:[384f], limit:10,<br/>with_payload:true,<br/>params.quantization.rescore:true}"]
+    F --> H["SearchChunks(chatbotID, queryVec, topK=10)\nPOST :6333/collections/{name}/points/search\n{vector:[384f], limit:10,\nwith_payload:true,\nparams.quantization.rescore:true}"]
 
-    H --> I["Returns [{score, payload.text}]<br/>top 10 most similar chunks"]
+    H --> I["Returns [{score, payload.text}]\ntop 10 most similar chunks"]
 
-    I --> J["GetChunkCount(chatbotID)<br/>GET /collections/{name}"]
+    I --> J["GetChunkCount(chatbotID)\nGET /collections/{name}"]
 
     J --> K{"chunkCount >= 1000?"}
 
-    K -- "YES" --> L["Rerank(query, candidates, topK=3)<br/>POST :8001/rerank<br/>{query, passages:[10 texts], top_k:3}"]
+    K -- "YES" --> L["Rerank(query, candidates, topK=3)\nPOST :8001/rerank\n{query, passages:[10 texts], top_k:3}"]
 
-    L --> M["Python: rerank_model.rerank(query, passages)<br/>CrossEncoder ONNX inference<br/>Xenova/ms-marco-MiniLM-L-6-v2<br/>sorted by relevance score"]
+    L --> M["Python: rerank_model.rerank(query, passages)\nCrossEncoder ONNX inference\nXenova/ms-marco-MiniLM-L-6-v2\nsorted by relevance score"]
 
-    M --> N["Returns top 3 RerankResult<br/>{score, text, index}"]
+    M --> N["Returns top 3 RerankResult\n{score, text, index}"]
 
-    K -- "NO (< 1000 chunks)" --> O["Truncate: candidates[:3]<br/>skip reranker<br/>saves ~20ms"]
+    K -- "NO (< 1000 chunks)" --> O["Truncate: candidates[:3]\nskip reranker\nsaves ~20ms"]
 
     N --> P["Join 3 chunks with '\\n\\n---\\n\\n'"]
     O --> P
 
-    P --> Q["Inject into system message:<br/>'Use the following knowledge base...<br/>[chunk1]\\n---\\n[chunk2]\\n---\\n[chunk3]'"]
+    P --> Q["Inject into system message:\n'Use the following knowledge base...\n[chunk1]\\n---\\n[chunk2]\\n---\\n[chunk3]'"]
 
     Z --> Q
 
@@ -783,19 +783,19 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Req["GenerateCompletion(LLMRequest)<br/>{Model, Messages[], Temperature}"]
+    Req["GenerateCompletion(LLMRequest)\n{Model, Messages[], Temperature}"]
 
-    Req --> Check{"Model name<br/>contains?"}
+    Req --> Check{"Model name\ncontains?"}
 
-    Check -- "'gpt'" --> OpenAI["callOpenAI()<br/>POST api.openai.com/v1/chat/completions<br/>Authorization: Bearer OPENAI_APIKEY<br/>body: {model, messages, temperature?}<br/>note: skip temp for gpt-5-nano/5.4-nano<br/>parse: choices[0].message.content<br/>+ usage.total_tokens"]
+    Check -- "'gpt'" --> OpenAI["callOpenAI()\nPOST api.openai.com/v1/chat/completions\nAuthorization: Bearer OPENAI_APIKEY\nbody: {model, messages, temperature?}\nnote: skip temp for gpt-5-nano/5.4-nano\nparse: choices[0].message.content\n+ usage.total_tokens"]
 
-    Check -- "'claude'" --> Claude["callAnthropic()<br/>POST api.anthropic.com/v1/messages<br/>x-api-key: CLAUDE_APIKEY<br/>anthropic-version: 2023-06-01<br/>body: {model, messages(no system),<br/>system: extracted, max_tokens: 1024}<br/>parse: content[0].text<br/>+ input_tokens+output_tokens"]
+    Check -- "'claude'" --> Claude["callAnthropic()\nPOST api.anthropic.com/v1/messages\nx-api-key: CLAUDE_APIKEY\nanthropic-version: 2023-06-01\nbody: {model, messages(no system),\nsystem: extracted, max_tokens: 1024}\nparse: content[0].text\n+ input_tokens+output_tokens"]
 
-    Check -- "'gemini'" --> Gemini["callGemini()<br/>POST generativelanguage.googleapis.com/<br/>v1beta/models/{model}:generateContent<br/>?key=GOOGLE_API_KEY<br/>role mapping: system→user, assistant→model<br/>parse: candidates[0].content.parts[0].text<br/>tokens: 0 (not returned by Gemini)"]
+    Check -- "'gemini'" --> Gemini["callGemini()\nPOST generativelanguage.googleapis.com/\nv1beta/models/{model}:generateContent\n?key=GOOGLE_API_KEY\nrole mapping: system→user, assistant→model\nparse: candidates[0].content.parts[0].text\ntokens: 0 (not returned by Gemini)"]
 
-    Check -- "anything else" --> OpenRouter["callOpenRouter()<br/>POST openrouter.ai/api/v1/chat/completions<br/>Authorization: Bearer OPENROUTER_KEY<br/>OpenAI-compatible format<br/>parse: choices[0].message.content<br/>+ usage.total_tokens"]
+    Check -- "anything else" --> OpenRouter["callOpenRouter()\nPOST openrouter.ai/api/v1/chat/completions\nAuthorization: Bearer OPENROUTER_KEY\nOpenAI-compatible format\nparse: choices[0].message.content\n+ usage.total_tokens"]
 
-    OpenAI --> Post["cleanResponse(text)<br/>1. strip reasoning JSON artifacts<br/>2. fix contraction word boundaries<br/>   ('re'→' re', 'm'→' m'...)<br/>3. fix acronym run-ons<br/>4. collapse multiple spaces<br/>5. strings.TrimSpace()"]
+    OpenAI --> Post["cleanResponse(text)\n1. strip reasoning JSON artifacts\n2. fix contraction word boundaries\n   ('re'→' re', 'm'→' m'...)\n3. fix acronym run-ons\n4. collapse multiple spaces\n5. strings.TrimSpace()"]
 
     Claude --> Post
     Gemini --> Post
@@ -815,8 +815,8 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    T1["Source Added/Deleted<br/>(text/qa/file)"] --> BG["rebuildKnowledge(chatbotID)<br/>goroutine — background only"]
-    T2["User clicks Retrain AI Model<br/>POST /api/sources/{id}/retrain"] --> FULL
+    T1["Source Added/Deleted\n(text/qa/file)"] --> BG["rebuildKnowledge(chatbotID)\ngoroutine — background only"]
+    T2["User clicks Retrain AI Model\nPOST /api/sources/{id}/retrain"] --> FULL
 
     BG --> BMD["BuildKnowledgeMarkdown(chatbotID)"]
 
@@ -824,21 +824,21 @@ flowchart TD
 
     BMD --> R1["SELECT chatbot + ai_settings + all sources"]
 
-    R1 --> W1["Write knowledge.md<br/>= '# {name} — System Instructions'\n<br/>+ aiSettings.Instructions"]
+    R1 --> W1["Write knowledge.md\n= '# {name} — System Instructions'\n\n+ aiSettings.Instructions"]
 
     R1 --> W2{"Any type='text' sources?"}
-    W2 -- "YES" --> W2a["Write snippets.md<br/>= '# Text Snippets'\n<br/>## {title}\n{content}\n..."]
+    W2 -- "YES" --> W2a["Write snippets.md\n= '# Text Snippets'\n\n## {title}\n{content}\n..."]
     W2 -- "NO" --> W2b["Remove snippets.md if exists"]
 
     R1 --> W3{"Any type='qa' sources?"}
-    W3 -- "YES" --> W3a["Write qa.md<br/>= '# Q&A Knowledge Base'\n<br/>**Q:** ...\n**A:** ..."]
+    W3 -- "YES" --> W3a["Write qa.md\n= '# Q&A Knowledge Base'\n\n**Q:** ...\n**A:** ..."]
     W3 -- "NO" --> W3b["Remove qa.md if exists"]
 
     R1 --> W4{"Any type='file' sources with content?"}
     W4 -- "YES" --> W4a["Remove old files/ dir\nRecreate files/\nWrite {sanitized_title}.txt\nfor each file source"]
     W4 -- "NO" --> W4b["Remove files/ dir if exists"]
 
-    BMD -- "background only" --> BGEnd["Done — Qdrant NOT updated<br/>Chat falls back to file-based context<br/>until Retrain is clicked"]
+    BMD -- "background only" --> BGEnd["Done — Qdrant NOT updated\nChat falls back to file-based context\nuntil Retrain is clicked"]
 
     FULL --> FMD["buildRAGContent(chatbotID)\nPriority read: snippets.md, qa.md, crawlData.md\nThen: all .txt/.md/.csv/.html in upload dir\nSkip: knowledge.md"]
 
@@ -964,7 +964,7 @@ flowchart TD
 
     Tokenize --> Score["For each word i:"]
 
-    Score --> IntCheck{"Previous word is<br/>intensifier?"}
+    Score --> IntCheck{"Previous word is\nintensifier?"}
     IntCheck -- "very=1.3, extremely=1.5\nabsolutely=1.5, really=1.2\nso=1.2, incredibly=1.5..." --> Mult["multiplier = intensifier value"]
     IntCheck -- "no" --> Mult1["multiplier = 1.0"]
     Mult --> NegCheck
@@ -1107,14 +1107,14 @@ sequenceDiagram
     Note over Admin: Setup Flow
     Admin->>TG: (manual) /newbot via @BotFather
     TG-->>Admin: bot token
-    Admin->>API: PUT /api/agents/{id}/telegram<br/>{bot_token, notification_chat_id, notify_*}
+    Admin->>API: PUT /api/agents/{id}/telegram\n{bot_token, notification_chat_id, notify_*}
     API->>TG: GET https://api.telegram.org/bot{token}/getMe
     TG-->>API: {ok:true, result:{id, is_bot:true, username, first_name}}
-    API->>API: EncryptToken(token)<br/>AES-256-GCM, random nonce<br/>store as hex(nonce+ciphertext)
-    API->>DB: UPSERT TelegramConfig<br/>{encrypted_token, username, notification_chat_id, notify_*}
+    API->>API: EncryptToken(token)\nAES-256-GCM, random nonce\nstore as hex(nonce+ciphertext)
+    API->>DB: UPSERT TelegramConfig\n{encrypted_token, username, notification_chat_id, notify_*}
 
     opt PUBLIC_BASE_URL is set
-        API->>TG: POST setWebhook<br/>{url: PUBLIC_BASE_URL/api/telegram/webhook/{id},<br/>secret_token: hex(random 16 bytes),<br/>allowed_updates: [message, callback_query],<br/>drop_pending_updates: true}
+        API->>TG: POST setWebhook\n{url: PUBLIC_BASE_URL/api/telegram/webhook/{id},\nsecret_token: hex(random 16 bytes),\nallowed_updates: [message, callback_query],\ndrop_pending_updates: true}
         TG-->>API: {ok: true}
         API->>DB: UPDATE webhook_set=true
     end
@@ -1127,7 +1127,7 @@ sequenceDiagram
     API->>DB: SELECT TelegramConfig WHERE enabled=true
     opt NotifyNewSession=true AND notification_chat_id set
         API->>API: DecryptToken(encrypted)
-        API->>TG: POST sendMessage<br/>{chat_id, text:"💬 New Chat Started...", parse_mode:"HTML"}
+        API->>TG: POST sendMessage\n{chat_id, text:"💬 New Chat Started...", parse_mode:"HTML"}
         TG-->>Admin: Telegram notification received
     end
 
@@ -1136,14 +1136,14 @@ sequenceDiagram
     API->>API: go SendNotification("new_lead", {name, email, phone})
     opt NotifyNewLead=true (default)
         API->>API: DecryptToken()
-        API->>TG: POST sendMessage<br/>"📋 New Lead Captured\n👤 Name\n📧 email\n📞 phone"
+        API->>TG: POST sendMessage\n"📋 New Lead Captured\n👤 Name\n📧 email\n📞 phone"
     end
 
     Note over Admin: Webhook Commands
-    TG->>API: POST /api/telegram/webhook/{id}<br/>X-Telegram-Bot-Api-Secret-Token: {secret}
-    API->>API: ValidateWebhookSignature(header, expected)<br/>hmac.Equal comparison
+    TG->>API: POST /api/telegram/webhook/{id}\nX-Telegram-Bot-Api-Secret-Token: {secret}
+    API->>API: ValidateWebhookSignature(header, expected)\nhmac.Equal comparison
     alt /start command
-        API->>TG: "👋 Hello! Your Chat ID is: {chatID}<br/>Paste in Notification Chat ID field"
+        API->>TG: "👋 Hello! Your Chat ID is: {chatID}\nPaste in Notification Chat ID field"
     else /chatid command
         API->>TG: "Your Telegram Chat ID is: {chatID}"
     else /status command
