@@ -1,8 +1,9 @@
 # Multi-Tenant AI Chatbot Builder
 
-## The code stays private and will be shown as demo to recruiters only.
+> [!IMPORTANT]
+> ## 🔒 The **CODE** remains **PRIVATE** and will be **SHOWN** to recruiters for <ins>demo purposes ONLY</ins>.
 
-
+---
 
 
 | Area                           | Final Choice / Flow                                                          | Tools We WILL Use                                                           | Tools We WILL NOT Use                           | Reason for Final Decision                                                                                                                             |
